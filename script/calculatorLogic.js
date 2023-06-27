@@ -1,6 +1,6 @@
 let zerostate = false;
 let operationState = false;
-
+let numberQuantity = 0;
 
 let buttons = document.querySelectorAll('.numbers button');
 let buttonClear = document.querySelector('.stateActions #btnAC');
@@ -17,10 +17,36 @@ buttonClear.addEventListener('click',clear);
 buttonEqual.addEventListener('click',equal);
 buttonDel.addEventListener('click',del);
 
+window.addEventListener('keydown', keyDownAction);
 
-function getButtonText (button) {
+function keyDownAction(event) {
+    let key = document.querySelector(`[data-keyCode = "${event.keyCode}"]`);
+    
+    let buttons = [96,97,98,99,100,101,102,103,104,105,106,107,109,110,111];
+    
 
-    let key = button.target.id.replace('btn','');
+    if (buttons.includes(event.keyCode)) {
+        getButtonText(key,false);
+    } else if (event.keyCode == 13){
+        equal();
+    } else if (event.keyCode == 8) {
+        del();
+    } else if (event.keyCode == 46){
+        clear();
+    }
+
+
+}
+
+
+function getButtonText (button, type = true) {
+    
+    let key;
+    if (type) {
+        key = button.target.id.replace('btn','');
+    } else {
+        key = button.id.replace('btn','');
+    }
 
     if (key === 'Slash'){
         key = '/';
@@ -51,6 +77,7 @@ function printOperationDisplay(key) {
         operationDisplayText.textContent = 
         operationDisplayText.textContent.concat(' ',key, ' ');
         operationState = true;
+        numberQuantity = 0;
         enableButton();
     } else {
         if (!zerostate) {
@@ -60,7 +87,8 @@ function printOperationDisplay(key) {
             operationDisplayText.textContent.concat('',key);
         }
         
-        if (operationDisplayText.textContent.length>9) {
+        numberQuantity += 1;
+        if (numberQuantity>20) {
             blockButton();
         }
     }
@@ -119,7 +147,10 @@ function equal(){
     }
 
     /*Rounding up the number to six decimal places*/
-    result = +(result.toFixed(8));
+    if ((!isNaN(firstNumber) && firstNumber != 0) && (!isNaN(lastNumber) && lastNumber != 0)){
+        result = +(result.toFixed(10));
+    } 
+    
 
     /*Must update the history and operation display*/
     historyDisplayText.textContent = operationDisplayText.textContent;
